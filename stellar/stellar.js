@@ -1,8 +1,19 @@
 Stellar = {
 }
 
+Stellar.client = {
+}
+
+Stellar.client.init = function() {
+  if(Meteor.is_client) {
+    Stellar.log('init');
+    Session.set('loaded', true);
+    Backbone.history.start({pushState: true});
+  }
+}
+
 //This will allow us to turn logs off quicker
-Stellar.log = function(mesage) {
+Stellar.log = function(message) {
   if(console && console.log) {
     console.log(message);
   }
@@ -26,3 +37,5 @@ Stellar.Collection = function(name) {
   }
   return collection;
 }
+
+Stellar.client.init();
