@@ -1,13 +1,16 @@
 Stellar = {};
-Stellar._controllers = [];
+Stellar._controllers = {};
 Stellar.client = {};
 Stellar.page = {};
+Stellar.loaded = false;
 
 Stellar.client.init = function() {
   if(Meteor.is_client) {
+    //Call controllers when everything exists
+    Stellar.page.call();
+
     Stellar.log('Init');
-    Session.set('loaded', true);
-    Backbone.history.start({pushState: true});
+    Stellar.loaded = true;
     Meteor.startup(function() {
       Stellar.client.linkHandler();
     });
@@ -26,10 +29,28 @@ Stellar.client.linkHandler = function() {
   });
 }
 
+Stellar.client.registerHelper = function(name, func) {
+  if(Meteor.is_client) {
+    Handlebars.registerHelper(name, func);;
+  }
+};
+
 Stellar.navigate = function(path, load) {
   Stellar.logPageLoad(path);
   Router.navigate(path, load);
 }
+
+Stellar.render = function(template, properties) {
+  Stellar.log('Render called: ' + template);
+  if(properties) {
+    _.each(properties, function(property, key) {
+      Stellar.log(key);
+      Stellar.log(property);
+      Template[template][key] = property;
+    });
+  }
+  Session.set('stellar_new_page', template);
+};
 
 Stellar.logPageLoad = function(path) {
 //TODO make this an event where a analytics extension can hook in instead
@@ -46,19 +67,10 @@ Stellar.log = function(message) {
   }
 }
 
-Stellar.page.set = function(controller, action) {
-  Stellar.log('Set page called');
-  Stellar.log('Controller: ' + controller);
-  Stellar.log('Action: ' + action);
-  Stellar.page.controller = controller;
-  Stellar.page.action = action;
-}
-
 Stellar.Controller = function(name) {
   self = this;
-  self.name = name;
 
-  Stellar._controllers.push(self);
+  Stellar._controllers[name] = self;
 };
 
 Stellar.Collection = function(name, manager, driver) {
@@ -73,4 +85,52 @@ Stellar.Collection = function(name, manager, driver) {
   return collection;
 };
 
-Stellar.client.init();
+Stellar.page.set = function(controller, action) {
+  Stellar.log('Set page called');
+  Stellar.log('Controller: ' + controller);
+  Stellar.log('Action: ' + action);
+  Stellar.page.controller = controller;
+  if(!action) {
+    action = 'index';
+  }
+  Stellar.page.action = action;
+};
+
+Stellar.page.call = function() {  
+  Stellar.log(Stellar._controllers[Stellar.page.controller.toString()]);
+  Stellar.log(Stellar.page.controller);
+  if(Stellar._controllers[Stellar.page.controller]) { //TODO fix missing error
+    controllerObj = Stellar._controllers[Stellar.page.controller];
+    Stellar.log(controllerObj);
+    if(controllerObj[Stellar.page.action]) {
+      controllerObj[Stellar.page.action]();
+    }
+  }
+};
+
+Stellar.client.registerHelper('stellar_page', function() {
+  Stellar.log('Content helper');
+  Session.get('stellar_new_page');
+
+  if(Stellar.loaded) {
+    //Stupid issue of home page not rendering, will refactor below to use this instead of equals
+    Stellar.log(Session.get('stellar_new_page'));
+    if(Template[Session.get('stellar_new_page')]) {
+      console.log('Load new page');
+      return Meteor.ui.chunk(function() { return Template[Session.get('stellar_new_page')]();});
+    } else {
+      Stellar.log('404!'); //TODO
+    }
+    return '';
+  }
+  Stellar.log('Show nowt');
+  return '';
+});
+
+if(Meteor.is_client) {
+  //This needs to be called so all the controllers are initialised
+  $(window).load(function() {
+    Stellar.client.init();
+  });
+  Backbone.history.start({pushState: true});
+}
