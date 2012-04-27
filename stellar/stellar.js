@@ -23,22 +23,26 @@ Stellar.client.linkHandler = function() {
     //TODO decide what links should use this function
     if(!link.match(/^http:\/\/www\./)) {
       e.preventDefault();
-      Stellar.navigate(link, true);
       Stellar.log('Link clicked');
+      Stellar.navigate(link, true);
+      Stellar.log('Link Navigated');
+      Stellar.page.call();
+      Stellar.log('Link called');
     }
   });
 }
 
 Stellar.client.registerHelper = function(name, func) {
   if(Meteor.is_client) {
-    Handlebars.registerHelper(name, func);;
+    Handlebars.registerHelper(name, func);
   }
 };
 
 Stellar.navigate = function(path, load) {
+  Stellar.log('Navigate to:' + path);
   Stellar.logPageLoad(path);
   Router.navigate(path, load);
-}
+};
 
 Stellar.render = function(template, properties) {
   Stellar.log('Render called: ' + template);
@@ -49,7 +53,8 @@ Stellar.render = function(template, properties) {
       Template[template][key] = property;
     });
   }
-  Session.set('stellar_new_page', template);
+  Stellar.page.template = template;
+  Stellar.page.context.invalidate();
 };
 
 Stellar.logPageLoad = function(path) {
@@ -58,7 +63,7 @@ Stellar.logPageLoad = function(path) {
 //    Stellar.log('log page'+path);
 //    Stellar.analytics.push(['_trackPageview', path]);
 //  }
-}
+};
 
 //This will allow us to turn logs off quicker
 Stellar.log = function(message) {
@@ -110,14 +115,22 @@ Stellar.page.call = function() {
 
 Stellar.client.registerHelper('stellar_page', function() {
   Stellar.log('Content helper');
-  Session.get('stellar_new_page');
+  // Session.get('stellar_new_page');
+  var context = Meteor.deps.Context.current;
+  if(context && !Stellar.page.context) {
+    Stellar.page.context = context;
+    context.on_invalidate(function() {
+      Stellar.log('invalidate');
+      Stellar.page.context = null;
+    });
+  }
 
   if(Stellar.loaded) {
     //Stupid issue of home page not rendering, will refactor below to use this instead of equals
-    Stellar.log(Session.get('stellar_new_page'));
-    if(Template[Session.get('stellar_new_page')]) {
+    //Stellar.log(Session.get('stellar_new_page'));
+    if(Template[Stellar.page.template]) {
       console.log('Load new page');
-      return Meteor.ui.chunk(function() { return Template[Session.get('stellar_new_page')]();});
+      return Meteor.ui.chunk(function() { return Template[Stellar.page.template]();});
     } else {
       Stellar.log('404!'); //TODO
     }
