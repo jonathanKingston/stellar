@@ -9,13 +9,13 @@ if(Meteor.is_client) {
       ":controller/": "basicPage",
     },
     homePage: function() {
-      Stellar.setPage('home');
+      Stellar.page.set('home');
     },
     basicPage: function(controller) {
-      Stellar.setPage(controller);
+      Stellar.page.set(controller);
     },
     actionPage: function(controller, action) {
-      Stellar.setPage(controller, action);
+      Stellar.page.set(controller, action);
     }
   });
   Router = new StellarRouter;
