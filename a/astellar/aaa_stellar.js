@@ -74,7 +74,6 @@ Stellar.log = function(message) {
 
 Stellar.Controller = function(name) {
   self = this;
-
   Stellar._controllers[name] = self;
 };
 
@@ -91,13 +90,29 @@ Stellar.Collection = function(name, manager, driver) {
 };
 
 Stellar.page.set = function(controller, action) {
+  //TODO make this whole method more flexible
   Stellar.log('Set page called');
   Stellar.log('Controller: ' + controller);
   Stellar.log('Action: ' + action);
   Stellar.page.controller = controller;
+
   if(!action) {
     action = 'index';
   }
+
+  params = {};
+  //TODO - pass in get string here
+
+  //Check for controller, if it exists check for that action
+  //If it doesn't exist look for a show action instead
+  if(Stellar._controllers[controller]) {
+    if(!Stellar._controllers[controller][action] && Stellar._controllers[controller]['show']) {
+      params['show'] = action;
+      action = 'show';
+    }
+  }
+
+  Stellar.page.params = params;
   Stellar.page.action = action;
 };
 
@@ -115,7 +130,6 @@ Stellar.page.call = function() {
 
 Stellar.client.registerHelper('stellar_page', function() {
   Stellar.log('Content helper');
-  // Session.get('stellar_new_page');
   var context = Meteor.deps.Context.current;
   if(context && !Stellar.page.context) {
     Stellar.page.context = context;
@@ -126,8 +140,6 @@ Stellar.client.registerHelper('stellar_page', function() {
   }
 
   if(Stellar.loaded) {
-    //Stupid issue of home page not rendering, will refactor below to use this instead of equals
-    //Stellar.log(Session.get('stellar_new_page'));
     if(Template[Stellar.page.template]) {
       console.log('Load new page');
       return Meteor.ui.chunk(function() { return Template[Stellar.page.template]();});
@@ -145,5 +157,27 @@ if(Meteor.is_client) {
   $(window).load(function() {
     Stellar.client.init();
   });
+
+  StellarRouter = Backbone.Router.extend({
+    routes: {
+      ":controller/:action": "actionPage",
+      ":contoller/:action/": "actionPage",
+      "/": "homePage",
+      "": "homePage",
+      ":controller": "basicPage",
+      ":controller/": "basicPage",
+    },
+    homePage: function() {
+      Stellar.page.set('home');
+    },
+    basicPage: function(controller) {
+      Stellar.page.set(controller);
+    },
+    actionPage: function(controller, action) {
+      Stellar.page.set(controller, action);
+    }
+  });
+  Router = new StellarRouter;
+
   Backbone.history.start({pushState: true});
 }

@@ -3,7 +3,17 @@ Stellar
 
 Just a test at the moment, it should help you build more advanced Meteor apps faster.
 
+To use
+------
 
+To use this code copy the a directory into your Meteor project. (Its named a, to fix an inclusion issue in Meteor).
+You also need to have the package Backbone installed in your project:
+
+     Meteor add backbone
+
+
+Example
+-------
 
 Code sample:
 
