@@ -6,12 +6,12 @@ Stellar.loaded = false;
 
 Stellar.client.init = function() {
   if(Meteor.is_client) {
-    //Call controllers when everything exists
-    Stellar.page.call();
-
     Stellar.log('Init');
     Stellar.loaded = true;
     Meteor.startup(function() {
+      //Call controllers when everything exists
+      Stellar.page.call();
+
       Stellar.client.linkHandler();
     });
   }
@@ -77,7 +77,15 @@ Stellar.log = function(message) {
 
 Stellar.Controller = function(name) {
   self = this;
+  Stellar.log('Call controller');
   Stellar._controllers[name] = self;
+
+  //TODO this is a hack to solve execution order issue
+  if(name == Stellar.page._controller) {
+    Stellar.log('Call setPage again');
+    Stellar.page.set(Stellar.page._controller, Stellar.page._action);
+    Stellar.page.call();
+  }
 };
 
 Stellar.Collection = function(name, manager, driver) {
@@ -94,6 +102,8 @@ Stellar.Collection = function(name, manager, driver) {
 
 Stellar.page.set = function(controller, action) {
   //TODO make this whole method more flexible
+  Stellar.page._controller = controller;
+  Stellar.page._action = action;
   Stellar.log('Set page called');
   Stellar.log('Controller: ' + controller);
   Stellar.log('Action: ' + action);
@@ -107,7 +117,9 @@ Stellar.page.set = function(controller, action) {
   //TODO - pass in get string here
   actionBits = action.split('#');
   action = actionBits[0];
-  params['hash'] = actionBits[1];
+  if(actionBits[1]) {
+    params['hash'] = actionBits[1];
+  }
 
   //Check for controller, if it exists check for that action
   //If it doesn't exist look for a show action instead
