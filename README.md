@@ -6,11 +6,10 @@ Just a test at the moment, it should help you build more advanced Meteor apps fa
 To use
 ------
 
-To use this code copy the a directory into your Meteor project. (Its named a, to fix an inclusion issue in Meteor).
-You also need to have the package Backbone installed in your project:
+To use this code copy the stellar directory into your meteor folder package folder.
+Then use:
 
-     Meteor add backbone
-
+    meteor add stellar
 
 Example
 -------
@@ -53,3 +52,8 @@ To use the functionality of above your template must look like:
       </div>
     </template>
 
+
+Known bugs:
+-----------
+
+Currenly Stellar has issues loading a page directly sometimes, this is due to execution order of Controllers. I am working on this currently.
