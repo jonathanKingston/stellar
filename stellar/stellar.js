@@ -7,8 +7,15 @@ Stellar.loaded = false;
 Stellar.client.init = function() {
   if(Meteor.is_client) {
     Stellar.log('Init');
-    Stellar.loaded = true;
     Meteor.startup(function() {
+
+    //TODO this is a hack to solve execution order issue
+      if(!Stellar.action_exists()) {
+        Stellar.log('Call setPage again');
+        Stellar.page.set(Stellar.page._controller, Stellar.page._action);
+      }
+
+      Stellar.loaded = true;
       //Call controllers when everything exists
       Stellar.page.call();
 
@@ -31,7 +38,7 @@ Stellar.client.linkHandler = function() {
 Stellar.redirect = function(link) {
   Stellar.navigate(link, true);
   Stellar.log('Link Navigated');
-  Stellar.page.call();
+//  Stellar.page.call();
   Stellar.log('Link called');
 }
 
@@ -48,7 +55,8 @@ Stellar.navigate = function(path, load) {
 };
 
 Stellar.render = function(template, properties) {
-  Stellar.log('Render called: ' + template);
+  Stellar.log('Render called: ');
+  Stellar.log(template);
   if(properties) {
     _.each(properties, function(property, key) {
       Stellar.log(key);
@@ -77,15 +85,7 @@ Stellar.log = function(message) {
 
 Stellar.Controller = function(name) {
   self = this;
-  Stellar.log('Call controller');
   Stellar._controllers[name] = self;
-
-  //TODO this is a hack to solve execution order issue
-  if(name == Stellar.page._controller) {
-    Stellar.log('Call setPage again');
-    Stellar.page.set(Stellar.page._controller, Stellar.page._action);
-    Stellar.page.call();
-  }
 };
 
 Stellar.Collection = function(name, manager, driver) {
@@ -104,9 +104,7 @@ Stellar.page.set = function(controller, action) {
   //TODO make this whole method more flexible
   Stellar.page._controller = controller;
   Stellar.page._action = action;
-  Stellar.log('Set page called');
-  Stellar.log('Controller: ' + controller);
-  Stellar.log('Action: ' + action);
+
   Stellar.page.controller = controller;
 
   if(!action) {
@@ -121,26 +119,38 @@ Stellar.page.set = function(controller, action) {
     params['hash'] = actionBits[1];
   }
 
+  Stellar.page.params = params;
+  Stellar.page.action = action;
+
   //Check for controller, if it exists check for that action
   //If it doesn't exist look for a show action instead
   if(Stellar._controllers[controller]) {
-    if(!Stellar._controllers[controller][action] && Stellar._controllers[controller]['show']) {
-      params['show'] = action;
-      action = 'show';
+    if(!Stellar.action_exists() && Stellar._controllers[controller]['show']) {
+      Stellar.page.params['show'] = action;
+      Stellar.page.action = 'show';
     }
   }
 
-  Stellar.page.params = params;
-  Stellar.page.action = action;
+  if(Stellar.loaded === true) {
+    Stellar.page.call();
+  }
 };
 
-Stellar.page.call = function() {  
-  Stellar.log(Stellar._controllers[Stellar.page.controller.toString()]);
-  Stellar.log(Stellar.page.controller);
+Stellar.action_exists = function() {
+  if(Stellar._controllers[Stellar.page.controller] && Stellar._controllers[Stellar.page.controller][Stellar.page.action]) {
+    return true;
+  }
+  return false;
+};
+
+Stellar.page.call = function() {
+  Stellar.log('Call');
+  Stellar.log(Stellar.page);
   if(Stellar._controllers[Stellar.page.controller]) { //TODO fix missing error
+    Stellar.log('Controller');
     controllerObj = Stellar._controllers[Stellar.page.controller];
-    Stellar.log(controllerObj);
     if(controllerObj[Stellar.page.action]) {
+      Stellar.log('Action');
       controllerObj[Stellar.page.action]();
     }
   }
@@ -159,13 +169,14 @@ Stellar.client.registerHelper('stellar_page', function() {
 
   if(Stellar.loaded) {
     if(Template[Stellar.page.template]) {
-      console.log('Load new page');
+      Stellar.log('Load new page');
       return Meteor.ui.chunk(function() { return Template[Stellar.page.template]();});
     } else {
       throw new Meteor.Error('404', 'Page not found');
     }
     return '';
   }
+  Stellar.log(Stellar.page);
   Stellar.log('Show nowt');
   return '';
 });
