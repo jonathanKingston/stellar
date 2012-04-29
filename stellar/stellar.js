@@ -9,7 +9,7 @@ Stellar.client.init = function() {
     Stellar.log('Init');
     Meteor.startup(function() {
 
-    //TODO this is a hack to solve execution order issue
+      //TODO this is a hack to solve execution order issue
       if(!Stellar.action_exists()) {
         Stellar.log('Call setPage again');
         Stellar.page.set(Stellar.page._controller, Stellar.page._action);
@@ -37,9 +37,6 @@ Stellar.client.linkHandler = function() {
 
 Stellar.redirect = function(link) {
   Stellar.navigate(link, true);
-  Stellar.log('Link Navigated');
-//  Stellar.page.call();
-  Stellar.log('Link called');
 }
 
 Stellar.client.registerHelper = function(name, func) {
@@ -69,11 +66,7 @@ Stellar.render = function(template, properties) {
 };
 
 Stellar.logPageLoad = function(path) {
-//TODO make this an event where a analytics extension can hook in instead
-//  if(Stellar.analytics) {
-//    Stellar.log('log page'+path);
-//    Stellar.analytics.push(['_trackPageview', path]);
-//  }
+  $(window).trigger('stellar_page_load', [path]);
 };
 
 //This will allow us to turn logs off quicker
