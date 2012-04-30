@@ -105,7 +105,16 @@ Stellar.page.set = function(controller, action) {
   }
 
   params = {};
-  //TODO - pass in get string here
+  if(action.indexOf('?') !== -1) {
+    var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+    for(var i = 0; i < hashes.length; i++) {
+      var hash = hashes[i].split('=');
+      params[hash[0]] = hash[1];
+    }
+
+    action = action.slice(0, action.indexOf('?'));
+  }
+
   actionBits = action.split('#');
   action = actionBits[0];
   if(actionBits[1]) {
