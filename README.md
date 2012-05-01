@@ -48,12 +48,9 @@ To use the functionality of above your template must look like:
       <div class="hello">
         <h1>Oh Stellar!</h1>
         {{greeting}}
-        <a href="/new_page/">New page</a>
+        <a href="/home/new_page/">New page</a>
       </div>
     </template>
 
 
-Known bugs:
------------
-
-Currenly Stellar has issues loading a page directly sometimes, this is due to execution order of Controllers. I am working on this currently.
+For a working code version of this example visit: [Interstellar](https://github.com/jonathanKingston/interstellar)
