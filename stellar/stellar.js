@@ -148,7 +148,7 @@ if(Meteor.is_server) {
         throw new Meteor.Error(401, 'Session timeout');
         return false;
       }
-      return serverSession
+      return serverSession;
     } else {
       throw new Meteor.Error(401, 'Invalid session');
       return false;
