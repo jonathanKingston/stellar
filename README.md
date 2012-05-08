@@ -7,9 +7,17 @@ To use
 ------
 
 To use this code copy the stellar directory into your meteor folder package folder.
-Then use:
+  
+You need to add in Stellar which isn't an official smart package yet
+You need to copy this project into the meteor packages for linux this should be: `/usr/lib/meteor/packages/` for mac: `/usr/local/meteor/packages/`
+In your projects folder you should be able to run:
+
+    git clone git://github.com/jonathanKingston/stellar.git
+
+In the app direcory now:
 
     meteor add stellar
+
 
 Example
 -------
@@ -63,12 +71,13 @@ This is a little more complex and you need to be carefull to keep this secure. B
 
 There are 4 helper functions:
 Server side:
-Stellar.session.get
-Stellar.session.set
+Stellar.session.get(key)
+Stellar.session.set(data[, key])
+Stellar.session.delete(key)
 
 Client side:
-Stellar.session.getKey
-Stellar.session.updateKey
+Stellar.session.getKey()
+Stellar.session.updateKey(key)
 
 
 Get and set, do what you would expect and set and get the content of the session.
@@ -84,6 +93,7 @@ These methods should be used in a login function like so:
       }
     }
 
-
+The delete method should be called on the server side when the client wants to logout, if the user leaves the page they should at max have a valid session for 5 days. (More flexible options soon)
 
 Then on the client side you then need to updateKey and getKey in a similar way. So all my methods needing a logged in user pass the key stored on the client side.
+For more about the design choices I wrote [this session article](http://britto.co/blog/server_side_sessions).
