@@ -38,7 +38,7 @@ Stellar.client.init = function() {
 Stellar.client.linkHandler = function() {
   $('body').on('click', 'a', function(e){
     link = $(this).attr('href');
-    if(!link.match(/^(?:https?|mailto):\/\/.*/)) {
+    if(!link.match(/^(?:https?|mailto):\/\/.*/) && !link.match(/^#.*/)) {
       e.preventDefault();
       Stellar.log('Link clicked');
       Stellar.redirect(link);
