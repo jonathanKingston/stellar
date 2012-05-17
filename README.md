@@ -1,6 +1,8 @@
 Stellar
 =======
 
+Current version: 0.2
+
 Just a test at the moment, it should help you build more advanced Meteor apps faster.
 
 To use
@@ -16,8 +18,10 @@ In your projects folder you should be able to run:
 
 In the app direcory now:
 
+    meteor add jquery
     meteor add stellar
 
+The jQuery dependency will be removed soon, but for now you will need to add it to your app
 
 Example
 -------
