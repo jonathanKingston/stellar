@@ -1,9 +1,8 @@
 Stellar
 =======
 
-Current version: 0.2
-
-Just a test at the moment, it should help you build more advanced Meteor apps faster.
+Simple MVC for Meteor, it should help you build more advanced Meteor apps faster.
+Current version: 0.2.1
 
 To use
 ------
