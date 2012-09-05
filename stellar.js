@@ -82,7 +82,8 @@ Stellar.logPageLoad = function(path) {
 
 //This will allow us to turn logs off quicker
 Stellar.log = function(message) {
-  if(console && console.log) {
+  var debug = true;
+  if(console && console.log && debug) {
     console.log(message);
   }
 };
@@ -240,11 +241,16 @@ Stellar.page.call = function() {
       Stellar.log('Action');
       controllerObj[Stellar.page.action]();
     }
+  }else{
+    Stellar.redirect('404');
   }
 };
 
 Stellar.client.registerHelper('stellar_page', function() {
   Stellar.log('Content helper');
+  
+  var returner = '';
+  
   var context = Meteor.deps.Context.current;
   if(context && !Stellar.page.context) {
     Stellar.page.context = context;
@@ -257,15 +263,13 @@ Stellar.client.registerHelper('stellar_page', function() {
   if(Stellar.loaded) {
     if(Template[Stellar.page.template]) {
       Stellar.log('Load new page');
-      return Meteor.ui.chunk(function() { return Template[Stellar.page.template]();});
-    } else {
-      throw new Meteor.Error('404', 'Page not found');
+      returner = Template[Stellar.page.template]();
     }
-    return '';
   }
   Stellar.log(Stellar.page);
-  Stellar.log('Show nowt');
-  return '';
+  Stellar.log('Show now');
+  
+  return returner;
 });
 
 if(Meteor.is_client) {
