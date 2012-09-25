@@ -73,7 +73,9 @@ Stellar.render = function(template, properties) {
     });
   }
   Stellar.page.template = template;
-  Stellar.page.context.invalidate();
+  if(Stellar.page.context) {
+    Stellar.page.context.invalidate();
+  }
 };
 
 Stellar.logPageLoad = function(path) {
@@ -257,7 +259,7 @@ Stellar.client.registerHelper('stellar_page', function() {
   if(Stellar.loaded) {
     if(Template[Stellar.page.template]) {
       Stellar.log('Load new page');
-      return Meteor.ui.chunk(function() { return Template[Stellar.page.template]();});
+      return Template[Stellar.page.template]();
     } else {
       throw new Meteor.Error('404', 'Page not found');
     }
