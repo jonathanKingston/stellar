@@ -13,6 +13,9 @@ if(Meteor.is_client) {
   Stellar.session.getKey = function() {
     return $.cookie("stellar_session_key");
   };
+  Stellar.session.removeKey = function() {
+    $.cookie('the_cookie', null);
+  }
 }
 
 Stellar.client.init = function() {
